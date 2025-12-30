@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Binary / generated data
+*.bin
+Data/
+Graphs/
+
+# OS
+.DS_Store
+
