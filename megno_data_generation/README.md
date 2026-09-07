@@ -7,55 +7,20 @@ using `rebound`'s N-body integrator and built-in MEGNO computation.
 
 ## Directory structure
 
-This is the complete script history, not just the final versions -- earlier
-exploratory/verification scripts are included alongside the scripts that
-superseded them, since they document how the methodology was arrived at
-(in particular, the epoch-restart vs. continuous-integration distinction
-below was a real methodological correction mid-project, not the original
-design).
-
 ```
 code/
-  megno_map.py                  CORE MODULE (all other scripts depend on this):
-                                 build_sunjup_sim, compute_megno_grid,
+  megno_map.py                  core module: build_sunjup_sim, compute_megno_grid,
                                  compute_megno_timeseries_grid, plus a subprocess/
                                  timeout safety net for pathological (a,e) points
                                  that can hang rebound's C Kepler solver forever
   megno_worker.py                subprocess entry point used by that safety net
-
-  -- single-map / verification scripts --
-  single_megno_map.py            single (a,e) grid, one MEGNO snapshot -- the
-                                 original smoke test
-  verify_periodicity.py          confirms MEGNO(a,e) is exactly periodic in
-                                 epoch offset near multiples of Jupiter's
-                                 orbital period (superseded by the MA-offset
-                                 periodicity finding below, kept for the record)
-  megno_time_series.py           early exploration of MEGNO(t) at a single
-                                 (a,e) point
-
-  -- MA (spatial-axis) sweeps --
-  megno_ma_sweep.py              first MA sweep (coarse)
-  megno_ma_sweep_dense.py        denser follow-up; established that MEGNO(a,e)
-                                 is exactly 360-degree periodic in MA offset,
-                                 not the epoch-offset periodicity originally
-                                 suspected
-  megno_training_data.py         FINAL spatial-axis dataset generator: dense
-                                 1-degree-step training grid + held-out
-                                 half-degree validation grid, one 50-year
-                                 MEGNO snapshot per MA value
-
-  -- time-evolution: early exploration --
-  megno_year_ma_sweep.py         early joint year x MA exploration, still using
-                                 independent-epoch restarts per year (see note)
-  megno_time_evolution_ma60.py   verification script for the corrected
-                                 methodology at a single MA (60deg) before
-                                 generalizing to all MA values
-
-  -- time-evolution: final datasets --
-  megno_time_training_data.py    FINAL temporal-axis dataset generator: single
-                                 fixed MA, half-year-step checkpoints from one
-                                 continuous 100-year integration, integer-year
-                                 training set + held-out half-year validation set
+  megno_training_data.py         dense MA (spatial-axis) sweep: 1-degree-step
+                                 training grid + held-out half-degree validation
+                                 grid, one 50-year MEGNO snapshot per MA value
+  megno_time_training_data.py    dense time (temporal-axis) sweep: single fixed
+                                 MA, half-year-step checkpoints from one continuous
+                                 100-year integration, integer-year training set +
+                                 held-out half-year validation set
   megno_time_evolution_all_ma.py       time-evolution dataset (single continuous
                                  100yr integration per (a,e) point, checkpointed
                                  every 10yr), 16 MA values
@@ -64,23 +29,9 @@ code/
                                  already computed, so an interrupted run resumes
                                  cleanly instead of restarting
 
-  -- utilities --
-  benchmark_resolution.py        timing benchmark across grid resolutions
-
 Data/
   MEGNO_maps/                    generated .npz datasets land here
 ```
-
-**Important methodological note on `megno_year_ma_sweep.py`:** this early
-script samples "years" by rebuilding a fresh Sun+Jupiter simulation at a
-different real calendar epoch per year value (independent restarts), which
-conflates "how has Jupiter's real orbit drifted over calendar decades" with
-"how does chaos develop as one trajectory integrates forward" -- two
-different questions. `megno_time_evolution_ma60.py` and the final
-`megno_time_evolution_*.py` / `megno_time_training_data.py` scripts use the
-corrected approach: one continuous integration per (a,e) point, sampling the
-running MEGNO value at increasing checkpoint times. Kept in this release
-for transparency about that correction, not as a recommended approach.
 
 ## Key physical/methodological notes
 
